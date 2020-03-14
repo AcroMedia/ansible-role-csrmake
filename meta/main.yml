@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  author: Dale Anderson
+  description: Install a shell utility that generates SSL certificate signing requests (CSR) and installs the resultant signed certificates
+  company: Acro Media Inc.
+  license: GPLv3
+  min_ansible_version: 2.9
+  platforms:
+   - name: Ubuntu
+     versions:
+       - all
+   - name: EL
+     versions:
+       - all
+  galaxy_tags: []
+dependencies: []

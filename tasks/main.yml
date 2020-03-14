@@ -1,0 +1,24 @@
+---
+# @TODO: replace the Makefile with real ansible tasks
+- name: Create a temporary dir on the host
+  tempfile:
+    state: directory
+  register: remote_tempdir_result
+
+- name: Sync local scripts to the remote temp dir
+  synchronize:
+    src: "scripts/"
+    dest: "{{ remote_tempdir_result.path }}/"
+    recursive: true
+    rsync_opts:
+      - "--exclude=.git"
+  when: remote_tempdir_result is defined
+    and remote_tempdir_result.path is defined
+  register: upload_result
+
+- name: Run '{{ make_cmd }}' in the remote temp dir
+  shell: "{{ make_cmd }}"
+  args:
+    chdir: "{{ remote_tempdir_result.path }}/"
+  when: upload_result is defined
+    and upload_result.changed
