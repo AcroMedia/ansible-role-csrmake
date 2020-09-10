@@ -49,14 +49,18 @@ function main () {
 
   while [ ! -f "$PENDING_CSR" ]; do
     CSR_LIST=$(find "$CERTSDIR" -type f -name '*.csr.*' -mtime -$CSR_LIMIT_DAYS)
-    CSR_LIST_COUNT=$(echo "$CSR_LIST" | wc -l)
+    CSR_LIST_COUNT=$(find "$CERTSDIR" -type f -name '*.csr.*' -mtime -$CSR_LIMIT_DAYS -printf '.' | wc -c)
+    #cerr "CSR_LIST: $CSR_LIST"
+    #cerr "CSR_LIST_COUNT: $CSR_LIST_COUNT"
     if [ "$CSR_LIST_COUNT" -eq 0 ]; then
       cerr "There don't appear to be any CSRs (created within the last $CSR_LIMIT_DAYS days) waiting to be processed."
+      exit 1
     elif [ "$CSR_LIST_COUNT" -eq 1 ]; then
       PENDING_CSR="$CSR_LIST"
     elif [ "$CSR_LIST_COUNT" -gt 1 ]; then
       bold "Which CSR do you want to process:"
-      PENDING_CSR=$(multiple_choice "$CSR_LIST")
+      CSR_LIST_AS_STRING=$(echo -n "$CSR_LIST" | tr '\n' ' ')
+      PENDING_CSR=$(multiple_choice "$CSR_LIST_AS_STRING")
     else
       err "Could not determine PENDING_CSR from CSR_LIST"
       exit 1
@@ -286,7 +290,7 @@ function main () {
     cerr "Intermediates bundle:   $INTERMEDIATES_FILE"
   fi
   if [ -L "$LEGACY_BUNDLE" ]; then
-    cerr "                        $LEGACY_BUNDLE  (legacy symlink for acronet)"
+    cerr "                        $LEGACY_BUNDLE  (legacy symlink)"
   fi
   cerr "CSR:                    $CSR_FILE"
 
