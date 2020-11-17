@@ -1,0 +1,22 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+
+  pre_tasks:
+    - name: Update apt cache.
+      apt: update_cache=true cache_valid_time=600
+      changed_when: false
+
+    - name: rsync | install rsync
+      apt:
+        pkg: rsync
+        state: present
+
+    - name: make | install make
+      apt:
+        pkg: make
+        state: present
+
+  roles:
+    - role: ansible-role-csrmake
