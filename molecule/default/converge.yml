@@ -7,14 +7,19 @@
     - make_cmd: 'make -s install'
 
   pre_tasks:
+
     - name: Update apt cache.
       apt: update_cache=true cache_valid_time=600
       changed_when: false
 
-    - name: rsync | install rsync
-      apt:
-        pkg: rsync
-        state: present
+    - name: "Installing Rsync"
+      apt: >
+        pkg={{ item }}
+        state=latest
+        update_cache=yes
+        cache_valid_time=3600
+      with_items:
+        - rsync
 
     - name: make | install make
       apt:
