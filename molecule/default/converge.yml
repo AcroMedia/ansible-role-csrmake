@@ -11,20 +11,17 @@
     - name: Update apt cache.
       apt: update_cache=true cache_valid_time=600
       changed_when: false
+      when: ansible_os_family == 'Debian'
 
-    - name: "Installing Rsync"
-      apt: >
-        pkg={{ item }}
-        state=latest
-        update_cache=yes
-        cache_valid_time=3600
-      with_items:
-        - rsync
+    - name: Install rsync
+      package:
+        name: rsync
+        state: latest
 
-    - name: make | install make
-      apt:
-        pkg: make
-        state: present
+    - name: Install make
+      package:
+        name: make
+        state: latest
 
   roles:
     - role: ansible-role-csrmake
