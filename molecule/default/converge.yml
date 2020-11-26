@@ -13,12 +13,6 @@
       changed_when: false
       when: ansible_os_family == 'Debian'
 
-    - name: Install rsync on controller
-      connection: local
-      package:
-        name: rsync
-        state: latest
-
     - name: Install rsync on instance
       package:
         name: rsync
