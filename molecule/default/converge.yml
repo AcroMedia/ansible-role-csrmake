@@ -1,0 +1,27 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+
+  vars:
+    - make_cmd: 'make -s install'
+
+  pre_tasks:
+
+    - name: Update apt cache.
+      apt: update_cache=true cache_valid_time=600
+      changed_when: false
+      when: ansible_os_family == 'Debian'
+
+    - name: Install rsync on instance
+      package:
+        name: rsync
+        state: latest
+
+    - name: Install make
+      package:
+        name: make
+        state: latest
+
+  roles:
+    - role: ansible-role-csrmake
