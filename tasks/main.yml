@@ -1,9 +1,15 @@
 ---
 # @TODO: replace the Makefile with real ansible tasks
+- name: Check for tmp directory.
+  stat:
+    path: /tmp
+  register: temp_folder
+
 - name: Create a temporary dir on the host
   tempfile:
     state: directory
   register: remote_tempdir_result
+  when: temp_folder.stat.exists == false
 
 - name: Sync local scripts to the remote temp dir
   synchronize:
