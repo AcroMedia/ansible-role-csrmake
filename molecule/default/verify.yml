@@ -1,0 +1,37 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  tasks:
+
+    - name: Run the csrmake script
+      shell:  |
+        echo 'devnull@localhost
+        foo.example.com
+
+        CA
+        Some-state
+        SomeCity
+        Internet Widgits Pty Ltd
+        OrgUnitName
+        foo.example.com
+        nobody@example.com
+
+        CompanyName
+
+        ' | /usr/local/ssl/csrmake_sha256.sh
+      args:
+        executable: /bin/bash
+
+    - name: Collect the contents of private dir
+      find:
+        paths: /usr/local/ssl/private/
+        patterns: '*.key.*'
+        file_type: file
+      register: find_result
+
+    - assert:
+        that:
+          - find_result.matched == 1
+        fail_msg: "No 'key' files were found"
+        success_msg: "Private key file was generated"
