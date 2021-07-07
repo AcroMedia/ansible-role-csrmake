@@ -1,30 +1,31 @@
 ---
-# @TODO: replace the Makefile with real ansible tasks
-- name: Check for tmp directory.
-  stat:
-    path: /tmp
-  register: temp_folder
+- include_vars: vars/{{ ansible_os_family }}.yml
 
-- name: Create a temporary dir on the host
-  tempfile:
+- name: Create directories
+  file:
     state: directory
-  register: remote_tempdir_result
-  when: temp_folder.stat.exists == false
+    dest: "{{ item.dest }}"
+    recurse: "{{ item.recurse | default(false) }}"
+    mode: "{{ item.mode|default('0755') }}"
+    owner: "{{ item.owner|default('root') }}"
+    group: "{{ item.group|default('root') }}"
+  with_items:
+    - dest: /usr/local/ssl
+    - dest: /usr/local/ssl/certs
+    - dest: /usr/local/ssl/backups
+      mode: '0750'
+    - dest: /usr/local/ssl/private
+      mode: '2750'
+      group: "{{ csrm_admin_group }}"
 
-- name: Sync local scripts to the remote temp dir
-  synchronize:
-    src: "scripts/"
-    dest: "{{ remote_tempdir_result.path }}/"
-    recursive: true
-    rsync_opts:
-      - "--exclude=.git"
-  when: remote_tempdir_result is defined
-    and remote_tempdir_result.path is defined
-  register: upload_result
-
-- name: Run '{{ make_cmd }}' in the remote temp dir
-  shell: "{{ make_cmd }}"
-  args:
-    chdir: "{{ remote_tempdir_result.path }}/"
-  when: upload_result is defined
-    and upload_result.changed
+- name: Upload scripts
+  copy:
+    src: scripts/{{ item }}
+    dest: /usr/local/ssl/{{ item }}
+    mode: '0755'
+    owner: root
+    group: root
+    backup: true
+  with_items:
+    - csrmake_sha256.sh
+    - install-pending-cert.sh
